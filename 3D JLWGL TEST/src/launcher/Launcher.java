@@ -1,6 +1,7 @@
 package launcher;
 
 import java.awt.Color;
+
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +9,8 @@ import java.lang.Thread.State;
 
 import javax.swing.*;
 
+import main.GameStates;
+import main.GuiStates;
 import main.Main;
 
 public class Launcher extends JFrame {
@@ -53,7 +56,8 @@ public class Launcher extends JFrame {
 		play.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
-				new Main("main");
+				GameStates.state = GameStates.state.LOADING;
+				new Main();
 			}
 		});
 		
@@ -63,7 +67,8 @@ public class Launcher extends JFrame {
 		sandbox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
-				new Main("sandbox");
+				GameStates.state = GameStates.state.GAME_SANDBOX;
+				new Main();
 			}
 		});
 		
@@ -83,7 +88,8 @@ public class Launcher extends JFrame {
 		about.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
-				new LauncherAbout();
+				GuiStates.state = GuiStates.state.ABOUT;
+				new Main();
 			}
 		});
 		

@@ -4,6 +4,8 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 
+import gui.GuiButton;
+import gui.HudCrosshair;
 import input.Controller;
 
 import java.awt.Graphics;
@@ -20,14 +22,11 @@ import java.awt.Font;
 import launcher.Launcher;
 
 import org.lwjgl.*;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 
-import orthographic.FontLoader;
-import orthographic.GUIButton;
-import orthographic.GUIPaused;
-import orthographic.HUDCrosshair;
-
+import render.FontLoader;
 import render.Render3D;
 import render.RenderFog;
 import render.RenderLighting;
@@ -47,8 +46,8 @@ public class Main {
 	
 	public static volatile boolean running = true;
 	
-	public static Vector3f position = new Vector3f(0, 0, 0);
-	public static Vector3f rotation = new Vector3f(0, 0, 0);
+	public static Vector3f position = new Vector3f(-1, -0.5f, -1);
+	public static Vector3f rotation = new Vector3f(0, -180, 0);
 	public static Vector3f lightPosition = new Vector3f(0, 4, 0);	
 	
 	public static int fov = 68;
@@ -64,17 +63,18 @@ public class Main {
 	public static boolean printFPS = true;
 	
 	public static int polygonMode;
-	public static String gameMode;
-	public static boolean isPaused = false;
+	public static boolean isGameRunning = false;
 	
 	public static int tick = 0;
 	
-	Render3D render = new Render3D();
+	public static Render3D render = new Render3D();
+	public static TextureLoader textureLoader = new TextureLoader();
 	
- 	public Main(String gameMode) {
+ 	public Main() {
 		ScreenDisplay.initialise();
 		
 		new FontLoader();
+		//new RenderLightingNew();
 		
 		//Enables some 3D stuff (google it)
 		glShadeModel(GL_SMOOTH);
@@ -88,13 +88,6 @@ public class Main {
 		glEnable(GL_CULL_FACE); //culling is only rendering certain sides of objects
 		glCullFace(GL_BACK); //greatly improving performance
 		
-		if(gameMode == "sandbox") {
-			new RenderLightingNew();
-		}
-		if(gameMode == "main") {
-			//new RenderLightingNew();
-			new RenderFog(new Color(0f, 0f, 0f, 1), 20f, 100f);
-		}
 		getDelta();
 		lastFPS = getTime();
 		
@@ -108,47 +101,69 @@ public class Main {
 			glEnable(GL_CULL_FACE);
 	    	glEnable(GL_DEPTH_TEST);
 	    	
-			if(gameMode == "main") {
-				glDisable(GL_CULL_FACE);
-		    	glBindTexture(GL_TEXTURE_2D, TextureLoader.loadTexture("res/stone.png"));	
-		    	glCallList(LoadRoomMain.floorDisplayList);
-		    	glCallList(LoadRoomMain.ceilingDisplayList);
-		    	LoadRoomMain.loadWalls();
-		    	glLoadIdentity();
-			}
-			
-			if(gameMode == "sandbox") {
-		    	glBindTexture(GL_TEXTURE_2D, TextureLoader.loadTexture("res/floor.png"));		    	
-		    	glCallList(LoadRoomSandbox.floorDisplayList);
-		    	glCallList(LoadRoomSandbox.ceilingDisplayList);
-		    	glCallList(LoadRoomSandbox.wallDisplayList);
-		    	
-		    	glDisable(GL_CULL_FACE);
-		    	glBindTexture(GL_TEXTURE_2D, 0);
-		    	glCallList(Render3D.objectDisplayList);
-		    	glCallList(Render3D.renderModel(0, 2, 0, "res/models/mushroom thing.obj"));
-		    	glLoadIdentity();
-			}
+	    	/** GLU PERSPECTIVE DISPLAY **/
+	    	switch(GameStates.state) {
+	    		case GAME_MAIN:
+	    			glDisable(GL_CULL_FACE);
+	    			glBindTexture(GL_TEXTURE_2D, textureLoader.loadTexture("images/stone.png"));	
+	    			glCallList(LoadRoomMain.floorDisplayList);
+	    			glCallList(LoadRoomMain.ceilingDisplayList);
+	    			LoadRoomMain.loadWalls();
+	    			glLoadIdentity();
+	    			break;
+	    		case GAME_SANDBOX:
+	    			glBindTexture(GL_TEXTURE_2D, textureLoader.loadTexture("images/floor.png"));		    	
+			    	glCallList(LoadRoomSandbox.floorDisplayList);
+			    	glCallList(LoadRoomSandbox.ceilingDisplayList);
+			    	glCallList(LoadRoomSandbox.wallDisplayList);
+			    	
+			    	glDisable(GL_CULL_FACE);
+			    	glBindTexture(GL_TEXTURE_2D, 0);
+			    	glCallList(Render3D.objectDisplayList);
+			    	glCallList(render.renderModel(0, 2, 0, "models/mushroomthing.obj"));
+			    	glLoadIdentity();
+			    	
+			    	if(position.x <= -9.8) position.x = -9.8f;
+		        	if(position.x >= 9.8) position.x = 9.8f;
+		        	if(position.z <= -9.8) position.z = -9.8f;
+		        	if(position.z >= 9.8) position.z = 9.8f;
+			    	break;
+	    	}
+			/** END GLU PERSPECTIVE DISPLAY **/
 			
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glMatrixMode(GL_PROJECTION); 
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, ScreenDisplay.screenWidth, ScreenDisplay.screenHeight, 0, 1, -1); //creates an orthographics 2d view
+			glOrtho(0, ScreenDisplay.screenWidth, ScreenDisplay.screenHeight, 0, 1, -1); //creates an orthographic 2d view
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
 			
+			/** ORTHOGRAPHIC DISPLAY **/
 			glColor4f(1, 1, 1, 1);
-			if(isPaused) {
-				new GUIPaused();
-			}else{
-				new HUDCrosshair(Display.getWidth() / 2, Display.getHeight() / 2);
-				FontLoader.drawCenteredString(50, 20, "FPS: " + updateFPS());
+			switch(GuiStates.state) {
+				case HUD:
+					new HudCrosshair(Display.getWidth() / 2, Display.getHeight() / 2);
+					new LoadingDisplay();
+				break;
+				case PAUSE:
+					new GuiButton(200, 200, 100, 20);
+					FontLoader.drawCenteredString(50, 20, "FPS: " + Main.updateFPS());
+				break;
+				case ABOUT:
+					FontLoader.drawCenteredString(Display.getWidth() / 2, Display.getHeight() / 2 - 40, "Author: Kian Bennett");
+					FontLoader.drawCenteredString(Display.getWidth() / 2, Display.getHeight() / 2 + 40, "Version 0.0.4 pre-alpha");
+				break;
 			}
-		    glColor4f(1, 1, 1, 1);
-		        
-	        glMatrixMode(GL_PROJECTION);
+			switch(GameStates.state) {
+				case LOADING:
+					break;
+			}
+			glColor4f(1, 1, 1, 1);
+			/** END ORTHOGRAPHIC DISPLAY **/
+		    
+		    glMatrixMode(GL_PROJECTION);
 	        glPopMatrix();
 	        glMatrixMode(GL_MODELVIEW); //returns to original view
 	        glPopMatrix();
@@ -157,13 +172,6 @@ public class Main {
 	        glRotatef(rotation.y, 0, 1, 0);
 	        glRotatef(rotation.z, 0, 0, 1);
 	        glTranslatef(position.x, position.y, position.z);
-	        
-	        if(gameMode == "sandbox") {
-	        	if(position.x <= -9.8) position.x = -9.8f;
-	        	if(position.x >= 9.8) position.x = 9.8f;
-	        	if(position.z <= -9.8) position.z = -9.8f;
-	        	if(position.z >= 9.8) position.z = 9.8f;
-	        }
 	        
 	        RenderLighting.setLightPosition(lightPosition.x, lightPosition.y, lightPosition.z);
 	        
@@ -175,8 +183,7 @@ public class Main {
             }
 	            
             Display.update();
-			//Wait until the frame rate is 200 fps, if vsync is enabled
-			Display.sync(200);
+			Display.sync(65);
 				
 			if (Display.isCloseRequested()) {
                 running = false;
@@ -190,16 +197,16 @@ public class Main {
 		glDeleteShader(RenderShaders.vertexShader);
 		glDeleteShader(RenderShaders.fragmentShader);
 		glDeleteProgram(RenderShaders.shaderProgram);
-		glDeleteTextures(TextureLoader.loadTexture("res/floor.png"));
-		glDeleteTextures(TextureLoader.loadTexture("res/stone.png"));
-		glDeleteTextures(TextureLoader.loadTexture("res/grass.png"));
+		glDeleteTextures(textureLoader.loadTexture("images/floor.png"));
+		glDeleteTextures(textureLoader.loadTexture("images/stone.png"));
+		glDeleteTextures(textureLoader.loadTexture("images/grass.png"));
         glDeleteLists(LoadRoomSandbox.ceilingDisplayList, 1);
         glDeleteLists(LoadRoomSandbox.wallDisplayList, 1);
         glDeleteLists(LoadRoomSandbox.floorDisplayList, 1);
         glDeleteLists(LoadRoomMain.floorDisplayList, 1);
         glDeleteLists(LoadRoomMain.ceilingDisplayList, 1);
         glDeleteLists(Render3D.objectDisplayList, 1);
-        glDeleteLists(Render3D.renderModel(0, 2, 0, "res/models/mushroom thing.obj"), 1);
+        glDeleteLists(render.renderModel(0, 2, 0, "models/mushroomthing.obj"), 1);
 		Display.destroy();
 	}
 	
@@ -214,10 +221,9 @@ public class Main {
 		return delta;
 	}
 	
-	public String updateFPS() {
+	public static String updateFPS() {
 		if(getTime() - lastFPS > 1000) {
 			if(printFPS) {
-				//System.out.println("FPS: " + fps);
 				return Integer.toString(fps);
 			}
 			fps = 0;
@@ -232,7 +238,9 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		new Launcher(0);
+		GuiStates.state = GuiStates.state.HUD;
+		GameStates.state = GameStates.state.GAME_MAIN;
+		new Main();
 	}
 
 }

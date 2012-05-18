@@ -17,7 +17,9 @@ public class RenderShaders {
 		StringBuilder fragmentShaderSource = new StringBuilder();
 		
 		try{
-			BufferedReader reader = new BufferedReader(new FileReader("res/shader.vert"));
+			InputStream is = this.getClass().getResourceAsStream("shaders/shader.vert");
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader reader = new BufferedReader(isr);
 			String line;
 			while((line = reader.readLine()) != null) {
 				vertexShaderSource.append(line).append('\n');
@@ -29,7 +31,9 @@ public class RenderShaders {
 		}
 		
 		try{
-			BufferedReader reader = new BufferedReader(new FileReader("res/shader.frag"));
+			InputStream is = this.getClass().getResourceAsStream("shaders/shader.frag");
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader reader = new BufferedReader(isr);
 			String line;
 			while((line = reader.readLine()) != null) {
 				fragmentShaderSource.append(line).append('\n');

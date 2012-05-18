@@ -9,6 +9,9 @@ import static org.lwjgl.util.glu.GLU.gluPerspective;
 
 import java.lang.Thread.State;
 
+import main.GameStates;
+import main.GuiStates;
+import main.LoadingDisplay;
 import main.Main;
 import main.ScreenDisplay;
 
@@ -39,18 +42,17 @@ public class Controller{
 	public static int maxLookDown = -90;
 	
 	private int fov = Main.fov;
-	private String gameMode = Main.gameMode;
 	
 	public Controller() {
 		
-		boolean keyUp = Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W) && !Main.isPaused;
-        boolean keyDown = Keyboard.isKeyDown(Keyboard.KEY_DOWN) || Keyboard.isKeyDown(Keyboard.KEY_S) && !Main.isPaused;
-        boolean keyLeft = Keyboard.isKeyDown(Keyboard.KEY_LEFT) || Keyboard.isKeyDown(Keyboard.KEY_A) && !Main.isPaused;
-        boolean keyRight = Keyboard.isKeyDown(Keyboard.KEY_RIGHT) || Keyboard.isKeyDown(Keyboard.KEY_D) && !Main.isPaused;
-        boolean jump = Keyboard.isKeyDown(Keyboard.KEY_SPACE) && !Main.isPaused;
-        boolean fly = Keyboard.isKeyDown(Keyboard.KEY_C) && !Main.isPaused;
-        boolean sprint = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && !Main.isPaused;
-        boolean crouch = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && !Main.isPaused;
+		boolean keyUp = Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W) && GuiStates.state != GuiStates.state.PAUSE;
+        boolean keyDown = Keyboard.isKeyDown(Keyboard.KEY_DOWN) || Keyboard.isKeyDown(Keyboard.KEY_S) && GuiStates.state != GuiStates.state.PAUSE;
+        boolean keyLeft = Keyboard.isKeyDown(Keyboard.KEY_LEFT) || Keyboard.isKeyDown(Keyboard.KEY_A) && GuiStates.state != GuiStates.state.PAUSE;
+        boolean keyRight = Keyboard.isKeyDown(Keyboard.KEY_RIGHT) || Keyboard.isKeyDown(Keyboard.KEY_D) && GuiStates.state != GuiStates.state.PAUSE;
+        boolean jump = Keyboard.isKeyDown(Keyboard.KEY_SPACE) && GuiStates.state != GuiStates.state.PAUSE;
+        boolean fly = Keyboard.isKeyDown(Keyboard.KEY_C) && GuiStates.state != GuiStates.state.PAUSE;
+        boolean sprint = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && GuiStates.state != GuiStates.state.PAUSE;
+        boolean crouch = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && GuiStates.state != GuiStates.state.PAUSE;
         
         int delta = Main.getDelta();
         
@@ -210,7 +212,7 @@ public class Controller{
         	walkingSpeed /= crouchMultiplier;
         }
         
-        if (Mouse.isGrabbed()) {
+        if (Mouse.isGrabbed() && LoadingDisplay.isLoaded) {
             float mouseDX = (float) (Mouse.getDX() * mouseSpeed * 0.16f);
             float mouseDY = (float) (Mouse.getDY() * mouseSpeed * 0.16f);
             if (Main.rotation.y + mouseDX >= 360) {
@@ -233,7 +235,7 @@ public class Controller{
         	if(Keyboard.isKeyDown(Keyboard.KEY_C)) {
         		if(flying) { 
         			flying = false;
-        			Main.position.y = 0;
+        			Main.position.y = -0.5f;
         			System.out.println("FLYING DISABLED");
         		}else{
         			flying = true;
@@ -272,12 +274,17 @@ public class Controller{
         		RenderLightingNew.lightPosition.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
         	}
         	if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-        		Mouse.setGrabbed(false);
-        		if(Main.isPaused) {
-        			Mouse.setGrabbed(true);
-        			Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+        		switch(GuiStates.state) {
+        			case PAUSE:
+        				Mouse.setGrabbed(true);
+        				GuiStates.state = GuiStates.state.HUD;
+        			break;
+        			case HUD:
+        				Mouse.setGrabbed(false);
+        				Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+        				GuiStates.state = GuiStates.state.PAUSE;
+        			break;
         		}
-        		Main.isPaused = !Main.isPaused;
         	}
         }
 	}

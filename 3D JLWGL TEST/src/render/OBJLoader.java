@@ -4,8 +4,10 @@ import java.io.*;
 import org.lwjgl.util.vector.Vector3f;
 
 public class OBJLoader {
-	public static RenderModel loadModel(File f) throws FileNotFoundException, IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(f));
+	public static RenderModel loadModel(String fileDir) throws FileNotFoundException, IOException {
+		InputStream is = OBJLoader.class.getResourceAsStream(fileDir);
+		InputStreamReader isr = new InputStreamReader(is);
+		BufferedReader reader = new BufferedReader(isr);
         RenderModel m = new RenderModel();
         String line;
         while ((line = reader.readLine()) != null) {

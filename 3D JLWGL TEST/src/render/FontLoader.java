@@ -1,9 +1,10 @@
-package orthographic;
+package render;
 
 import java.awt.Font;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 
 import org.newdawn.slick.*;
 import org.newdawn.slick.font.effects.ColorEffect;

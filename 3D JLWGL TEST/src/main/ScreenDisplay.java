@@ -32,10 +32,10 @@ public class ScreenDisplay {
 				System.exit(0);
 			}
 			
-			new RenderShaders();
-			
 			Mouse.setGrabbed(true);
-			Mouse.setCursorPosition(600, 400);
+			Mouse.setCursorPosition(screenWidth / 2, screenHeight / 2);
+			
+			new RenderShaders();
 			
 			//Initialises OpenGL
 			glMatrixMode(GL_PROJECTION);

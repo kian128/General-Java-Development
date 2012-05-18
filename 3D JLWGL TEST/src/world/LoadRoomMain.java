@@ -98,9 +98,6 @@ public class LoadRoomMain {
 		        	   glCallList(LoadWall.loadWallStandardSouth(x * 2, -1, z * 2, 2, 2));
 		           	   glCallList(LoadWall.loadWallStandardWest(x * 2, -1, z * 2, 2, 2));
 		           }
-		           if(Main.position.x == x && Main.position.z == z) {
-		        	   System.out.println("COLLISION DETECTED");
-		           }
 		       }
 		   }
 	}

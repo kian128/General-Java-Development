@@ -25,11 +25,11 @@ import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 public class TextureLoader {
 	
-	public static int loadTexture(String fileDir) {
+	public int loadTexture(String fileDir) {
 		int texture = glGenTextures();
 		InputStream in = null;
 		try {
-			in = new FileInputStream(fileDir);
+			in = this.getClass().getResourceAsStream(fileDir);
 			PNGDecoder decoder = new PNGDecoder(in);
 			ByteBuffer buffer = BufferUtils.createByteBuffer(4 * decoder.getWidth() * decoder.getHeight());
 			decoder.decode(buffer, decoder.getWidth() * 4, Format.RGBA);

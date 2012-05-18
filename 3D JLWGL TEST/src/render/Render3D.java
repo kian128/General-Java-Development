@@ -3,8 +3,10 @@ package render;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -59,13 +61,13 @@ public class Render3D {
         glEndList();
 	}
 	
-	public static int renderModel(int x, int y, int z, String fileName) {
+	public int renderModel(int x, int y, int z, String fileName) {
 		int modelDisplayList = glGenLists(1);
         glNewList(modelDisplayList, GL_COMPILE);
         {
             RenderModel m = null;
             try {
-                m = OBJLoader.loadModel(new File(fileName));
+                m = OBJLoader.loadModel(fileName);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 System.exit(1);

@@ -43,8 +43,7 @@ public class LoadRoomMain {
 		return floorDisplayList;
 	}
 
-	public static int loadCeiling(int gridSize, float tileSize,
-			float ceilingHeight) {
+	public static int loadCeiling(int gridSize, float tileSize, float ceilingHeight) {
 		int ceilingDisplayList = glGenLists(1);
 		glNewList(ceilingDisplayList, GL_COMPILE);
 		glBegin(GL_QUADS);
@@ -63,7 +62,7 @@ public class LoadRoomMain {
 
 	public static void loadWalls() {
 		int[][] map = {
-				{5, 1, 1, 1, 1, 1, 1, 6},
+				{5, 1, 1, 0, 0, 1, 1, 6},
 				{4, 0, 0, 0, 0, 0, 0, 3},
 				{4, 0, 5, 1, 1, 6, 0, 3},
 				{4, 0, 4, 0, 0, 3, 0, 3},

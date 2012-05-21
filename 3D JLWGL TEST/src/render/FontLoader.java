@@ -8,22 +8,21 @@ import java.net.URL;
 
 import org.newdawn.slick.*;
 import org.newdawn.slick.font.effects.ColorEffect;
+import org.newdawn.slick.font.effects.ShadowEffect;
 
 public class FontLoader {
 	
-	private String fontPath;
 	public static UnicodeFont uFont;
 	
 	public FontLoader() {
+		java.awt.Font awtFont = new java.awt.Font("Trebuchet MS", java.awt.Font.PLAIN, 24);
+		uFont = new UnicodeFont(awtFont);
+		uFont.getEffects().add(new ColorEffect(java.awt.Color.white));
+		uFont.addAsciiGlyphs();
 		try {
-			fontPath = "res/8bitoperator_jve.ttf";
-			uFont = new UnicodeFont(fontPath, 24, false, false);
-			uFont.addAsciiGlyphs();
-			uFont.addGlyphs(400, 600);
-			uFont.getEffects().add(new ColorEffect(java.awt.Color.white));
 			uFont.loadGlyphs();
-		}catch(SlickException e) {
-			System.err.print(e);
+		} catch (SlickException e) {
+			e.printStackTrace();
 		}
 	}
 	

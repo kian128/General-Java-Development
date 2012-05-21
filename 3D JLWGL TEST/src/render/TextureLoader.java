@@ -53,6 +53,4 @@ public class TextureLoader {
            }
 		return texture;
 	}
-	
-
 }

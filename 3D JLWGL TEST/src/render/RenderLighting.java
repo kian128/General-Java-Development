@@ -6,22 +6,39 @@ import org.lwjgl.BufferUtils;
 
 public class RenderLighting {
 	
-	public RenderLighting() {
+	private float lightIntensity = 2;
+	
+	public void enableLighting() {
 		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0); //8 diff lights you can use
-		glLightModel(GL_LIGHT_MODEL_AMBIENT, asFloatBuffer(new float[]{0.05f, 0.05f, 0.05f, 1f})); //changes intensity of the colors of light
-		glLight(GL_LIGHT0, GL_DIFFUSE, asFloatBuffer(new float[]{2.5f, 2.5f, 2.5f, 1f}));
+		glEnable(GL_LIGHT0);
+		glEnable(GL_LIGHT1);
+		glEnable(GL_NORMALIZE);
+		glShadeModel(GL_SMOOTH);
 	}
 	
-	public static FloatBuffer asFloatBuffer(float[] values) {
+	public void enableAmbientLighting() {
+		float ambientColor[] = {1f, 1f, 1f, 1.0f};
+		glLightModel(GL_LIGHT_MODEL_AMBIENT, asFloatBuffer(ambientColor));
+	}
+	
+	public void setLightPosition(float x, float y, float z) {
+		float lightColor[] = {lightIntensity, lightIntensity, lightIntensity, 1.0f};
+		float lightPos[] = {x, y, z, 1.0f};
+		glLight(GL_LIGHT0, GL_DIFFUSE, asFloatBuffer(lightColor));
+		glLight(GL_LIGHT0, GL_POSITION, asFloatBuffer(lightPos));
+	}
+	
+	private static FloatBuffer asFloatBuffer(float[] values) {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(values.length);
 		buffer.put(values);
 		buffer.flip();
 		return buffer;
 	}
 	
-	public static void setLightPosition(float x, float y, float z) {
-		glLight(GL_LIGHT0, GL_POSITION, asFloatBuffer(new float[]{x, y, z, 1f}));
+	public void disableLighting() {
+		glDisable(GL_LIGHTING);
+		glDisable(GL_LIGHT0);
+		glDisable(GL_LIGHT1);
+		glDisable(GL_NORMALIZE);
 	}
-
 }

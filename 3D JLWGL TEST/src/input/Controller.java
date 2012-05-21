@@ -13,6 +13,7 @@ import main.GameStates;
 import main.GuiStates;
 import main.LoadingDisplay;
 import main.Main;
+import main.OverallStates;
 import main.ScreenDisplay;
 
 import org.lwjgl.LWJGLException;
@@ -22,7 +23,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.util.vector.Vector3f;
 
-import render.RenderLightingNew;
+import render.RenderLighting;
 
 public class Controller{
 	
@@ -34,8 +35,9 @@ public class Controller{
 	public static double bobCounter = 0;
 	public static double bobbingSpeed = 0.2;
 	public static double bobbingDistance = 0.01;
-	public static double jumpHeight = 0;
 	public static boolean flying = false;
+	public static boolean jumping = false;
+	public static double jumpHeight = 0;
 	
 	public static double mouseSpeed = 1.0;
 	public static int maxLookUp = 90;
@@ -44,7 +46,6 @@ public class Controller{
 	private int fov = Main.fov;
 	
 	public Controller() {
-		
 		boolean keyUp = Keyboard.isKeyDown(Keyboard.KEY_UP) || Keyboard.isKeyDown(Keyboard.KEY_W) && GuiStates.state != GuiStates.state.PAUSE;
         boolean keyDown = Keyboard.isKeyDown(Keyboard.KEY_DOWN) || Keyboard.isKeyDown(Keyboard.KEY_S) && GuiStates.state != GuiStates.state.PAUSE;
         boolean keyLeft = Keyboard.isKeyDown(Keyboard.KEY_LEFT) || Keyboard.isKeyDown(Keyboard.KEY_A) && GuiStates.state != GuiStates.state.PAUSE;
@@ -231,6 +232,16 @@ public class Controller{
             }
         }
         
+        if(jumping) {
+        	if(jumpHeight <= 3.14159 * 2) {
+        		jumpHeight += 0.5;
+       			Main.position.y -= Math.sin(jumpHeight) * 0.1;
+        	}if(jumpHeight >= 3.14159 * 2) {
+        		jumpHeight = 0;
+        		jumping = false;
+        	}
+        }
+        
         while(Keyboard.next()) {
         	if(Keyboard.isKeyDown(Keyboard.KEY_C)) {
         		if(flying) { 
@@ -241,6 +252,9 @@ public class Controller{
         			flying = true;
         			System.out.println("FLYING ENABLED");
         		}
+        	}
+        	if(Keyboard.isKeyDown(Keyboard.KEY_SPACE) && !jumping && !flying && OverallStates.state == OverallStates.state.IN_GAME) {
+        		jumping = true;
         	}
         	if(Keyboard.isKeyDown(Keyboard.KEY_F11)) {
         		 try {
@@ -270,10 +284,10 @@ public class Controller{
         		if(Main.polygonMode > 2) Main.polygonMode = 0;
         	}
         	if(Keyboard.isKeyDown(Keyboard.KEY_G)) {
-        		//Main.lightPosition = new Vector3f(-Main.position.x, -Main.position.y, -Main.position.z);
-        		RenderLightingNew.lightPosition.put(1.0f).put(1.0f).put(1.0f).put(1.0f).flip();
+        		RenderLighting lighting = new RenderLighting();
+        		lighting.setLightPosition(-Main.position.x, -Main.position.y, -Main.position.z);
         	}
-        	if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+        	if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE) && OverallStates.state == OverallStates.state.IN_GAME) {
         		switch(GuiStates.state) {
         			case PAUSE:
         				Mouse.setGrabbed(true);
@@ -288,5 +302,4 @@ public class Controller{
         	}
         }
 	}
-
 }

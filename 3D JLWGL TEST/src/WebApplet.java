@@ -8,12 +8,13 @@ import javax.swing.JApplet;
 import javax.swing.JLabel;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 import launcher.Launcher;
 import main.GameStates;
+import main.GuiStates;
 import main.Main;
-
 
 public class WebApplet extends Applet {
 	
@@ -26,7 +27,9 @@ public class WebApplet extends Applet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		GuiStates.state = GuiStates.state.NULL;
 		GameStates.state = GameStates.state.LOADING;
+		Mouse.setGrabbed(true);
 		new Main();
 	}
 	

@@ -67,7 +67,7 @@ public class Launcher extends JFrame {
 		sandbox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				dispose();
-				GameStates.state = GameStates.state.GAME_SANDBOX;
+				GameStates.state = GameStates.state.GAME_MODEL_TEST;
 				new Main();
 			}
 		});

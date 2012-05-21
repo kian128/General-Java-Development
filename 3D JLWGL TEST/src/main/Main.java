@@ -4,7 +4,11 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 
+import gui.GuiAbout;
 import gui.GuiButton;
+import gui.GuiMainMenu;
+import gui.GuiPauseMenu;
+import gui.GuiWorldSelect;
 import gui.HudCrosshair;
 import input.Controller;
 
@@ -30,7 +34,6 @@ import render.FontLoader;
 import render.Render3D;
 import render.RenderFog;
 import render.RenderLighting;
-import render.RenderLightingNew;
 import render.RenderShaders;
 import render.TextureLoader;
 import world.LoadRoomSandbox;
@@ -42,7 +45,7 @@ import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 public class Main {
 	
-	public static String version = "0.0.4 pre-alpha";
+	public static String version = "0.0.5 pre-alpha";
 	
 	public static volatile boolean running = true;
 	
@@ -69,12 +72,12 @@ public class Main {
 	
 	public static Render3D render = new Render3D();
 	public static TextureLoader textureLoader = new TextureLoader();
+	public static RenderLighting lighting = new RenderLighting();
 	
  	public Main() {
 		ScreenDisplay.initialise();
 		
 		new FontLoader();
-		//new RenderLightingNew();
 		
 		//Enables some 3D stuff (google it)
 		glShadeModel(GL_SMOOTH);
@@ -88,10 +91,15 @@ public class Main {
 		glEnable(GL_CULL_FACE); //culling is only rendering certain sides of objects
 		glCullFace(GL_BACK); //greatly improving performance
 		
+		lighting.setLightPosition(5, 0, 5);
+		new RenderFog(Color.black, 1, 20);
+		
 		getDelta();
 		lastFPS = getTime();
 		
 		while(running) {
+			OverallStates.defineStates();
+			
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			if(polygonMode == 0) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -103,15 +111,19 @@ public class Main {
 	    	
 	    	/** GLU PERSPECTIVE DISPLAY **/
 	    	switch(GameStates.state) {
-	    		case GAME_MAIN:
+	    		case GAME_DUNGEON_CRAWLER:
 	    			glDisable(GL_CULL_FACE);
 	    			glBindTexture(GL_TEXTURE_2D, textureLoader.loadTexture("images/stone.png"));	
 	    			glCallList(LoadRoomMain.floorDisplayList);
 	    			glCallList(LoadRoomMain.ceilingDisplayList);
 	    			LoadRoomMain.loadWalls();
 	    			glLoadIdentity();
+
+	    			lighting.disableLighting();
 	    			break;
-	    		case GAME_SANDBOX:
+	    		case GAME_MODEL_TEST:
+	    			lighting.enableLighting();
+					lighting.enableAmbientLighting();
 	    			glBindTexture(GL_TEXTURE_2D, textureLoader.loadTexture("images/floor.png"));		    	
 			    	glCallList(LoadRoomSandbox.floorDisplayList);
 			    	glCallList(LoadRoomSandbox.ceilingDisplayList);
@@ -128,6 +140,9 @@ public class Main {
 		        	if(position.z <= -9.8) position.z = -9.8f;
 		        	if(position.z >= 9.8) position.z = 9.8f;
 			    	break;
+	    		case GAME_TERRAIN_TEST:
+	    			
+	    			break;
 	    	}
 			/** END GLU PERSPECTIVE DISPLAY **/
 			
@@ -139,25 +154,31 @@ public class Main {
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
+			lighting.disableLighting();
 			
 			/** ORTHOGRAPHIC DISPLAY **/
 			glColor4f(1, 1, 1, 1);
+			new LoadingDisplay();
 			switch(GuiStates.state) {
 				case HUD:
 					new HudCrosshair(Display.getWidth() / 2, Display.getHeight() / 2);
-					new LoadingDisplay();
-				break;
-				case PAUSE:
-					new GuiButton(200, 200, 100, 20);
 					FontLoader.drawCenteredString(50, 20, "FPS: " + Main.updateFPS());
-				break;
-				case ABOUT:
-					FontLoader.drawCenteredString(Display.getWidth() / 2, Display.getHeight() / 2 - 40, "Author: Kian Bennett");
-					FontLoader.drawCenteredString(Display.getWidth() / 2, Display.getHeight() / 2 + 40, "Version 0.0.4 pre-alpha");
-				break;
+					break;
+				case PAUSE:
+					new GuiPauseMenu();
+					break;
 			}
 			switch(GameStates.state) {
 				case LOADING:
+					break;
+				case MENU_MAIN:
+					new GuiMainMenu();
+					break;
+				case MENU_ABOUT:
+					new GuiAbout();
+					break;
+				case MENU_WORLD_SELECT:
+					new GuiWorldSelect();
 					break;
 			}
 			glColor4f(1, 1, 1, 1);
@@ -173,8 +194,6 @@ public class Main {
 	        glRotatef(rotation.z, 0, 0, 1);
 	        glTranslatef(position.x, position.y, position.z);
 	        
-	        RenderLighting.setLightPosition(lightPosition.x, lightPosition.y, lightPosition.z);
-	        
         	new Controller();
 	        
 	        tick();
@@ -183,7 +202,7 @@ public class Main {
             }
 	            
             Display.update();
-			Display.sync(65);
+			Display.sync(200);
 				
 			if (Display.isCloseRequested()) {
                 running = false;
@@ -238,8 +257,8 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		GuiStates.state = GuiStates.state.HUD;
-		GameStates.state = GameStates.state.GAME_MAIN;
+		GuiStates.state = GuiStates.state.NULL;
+		GameStates.state = GameStates.state.LOADING;
 		new Main();
 	}
 

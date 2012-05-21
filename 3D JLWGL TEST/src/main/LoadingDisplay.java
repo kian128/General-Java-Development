@@ -2,6 +2,7 @@ package main;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 import render.FontLoader;
@@ -43,7 +44,8 @@ public class LoadingDisplay {
 		loadingTick += 1;
 		if(loadingTick == 200 && !isLoaded) {
 			isLoaded = true;
-			GameStates.state = GameStates.state.GAME_MAIN;
+			GameStates.state = GameStates.state.MENU_MAIN;
+			Mouse.setGrabbed(false);
 		}
 		return loadingTick;
 	}

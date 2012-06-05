@@ -13,18 +13,29 @@ import main.Main;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 
+import render.TextureLoader;
+
 import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 public class LoadRoomMain {
+	
+	TextureLoader textureLoader = new TextureLoader();
 
-	public static float ceilingHeightFinal = 1;
-	public static float floorHeightFinal = -1;
+	public static int ceilingHeightFinal = 1;
+	public static int floorHeightFinal = -1;
 	public static int gridSizeFinal = 100;
 	public static float tileSizeFinal = 0.2f;
 
 	public static int floorDisplayList = loadFloor(gridSizeFinal, tileSizeFinal, floorHeightFinal);
 	public static int ceilingDisplayList = loadCeiling(gridSizeFinal, tileSizeFinal, ceilingHeightFinal);
+	
+	public LoadRoomMain() {
+		glBindTexture(GL_TEXTURE_2D, textureLoader.loadTexture("images/stone.png"));	
+		loadWalls();
+		glCallList(LoadWall.loadFloor(-gridSizeFinal / 2, floorHeightFinal, -gridSizeFinal / 2, gridSizeFinal, gridSizeFinal, tileSizeFinal));
+		glCallList(LoadWall.loadFloor(-gridSizeFinal / 2, ceilingHeightFinal, -gridSizeFinal / 2, gridSizeFinal, gridSizeFinal, tileSizeFinal));
+	}
 
 	public static int loadFloor(int gridSize, float tileSize, float floorHeight) {
 		int floorDisplayList = glGenLists(1);

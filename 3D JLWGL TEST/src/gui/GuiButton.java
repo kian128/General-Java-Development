@@ -18,10 +18,12 @@ import org.newdawn.slick.Color;
 
 import render.FontLoader;
 import render.RenderFog;
+import render.TextureLoader;
 
 public class GuiButton {
 	
 	public static int x, y, width, height;
+	TextureLoader textureLoader = new TextureLoader();
 	
 	public GuiButton(int id, int x, int y, int width, int height, String s, Class parent) {
 		this.x = x;
@@ -29,7 +31,9 @@ public class GuiButton {
 		this.width = width;
 		this.height = height;
 		glDisable(GL_BLEND);
+		glBindTexture(GL_TEXTURE_2D, textureLoader.loadTexture("images/button.png"));		  
 		glCallList(draw(this.x, this.y, this.width, this.height));
+		glBindTexture(GL_TEXTURE_2D, 0);		  
 		glEnable(GL_BLEND);
 		FontLoader.drawCenteredString(this.x, this.y, s);
 		hit(id, parent);
@@ -39,12 +43,14 @@ public class GuiButton {
 		int displayList = glGenLists(1);
 		glNewList(displayList, GL_COMPILE);
 		glBegin(GL_QUADS);
-			glColor4f(0, 0, 0, 1);
+			glTexCoord2f(0, 0);
 			glVertex2f(x - width/2, y + height/2);
+			glTexCoord2f(0, 1);
 			glVertex2f(x - width/2, y - height/2);
+			glTexCoord2f(1, 1);
 			glVertex2f(x + width/2, y - height/2);
+			glTexCoord2f(1, 0);
 			glVertex2f(x + width/2, y + height/2);
-			glColor4f(1, 1, 1, 1);
 		glEnd();
 		glEndList();
 		return displayList;
@@ -69,7 +75,6 @@ public class GuiButton {
 				} catch (InvocationTargetException e) {
 					e.printStackTrace();
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

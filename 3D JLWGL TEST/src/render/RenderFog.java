@@ -23,5 +23,5 @@ public class RenderFog {
 		glFogf(GL_FOG_END, fogFar);
 		glFogf(GL_FOG_DENSITY, 0.005f);
 	}
-
+	
 }

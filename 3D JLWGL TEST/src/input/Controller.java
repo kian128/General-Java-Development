@@ -233,13 +233,17 @@ public class Controller{
         }
         
         if(jumping) {
-        	if(jumpHeight <= 3.14159 * 2) {
+        	if(jumpHeight <= Math.PI * 2) {
         		jumpHeight += 0.5;
        			Main.position.y -= Math.sin(jumpHeight) * 0.1;
-        	}if(jumpHeight >= 3.14159 * 2) {
+        	}if(jumpHeight > Math.PI * 2) {
         		jumpHeight = 0;
         		jumping = false;
         	}
+        }
+        
+        if(!flying) {
+        	//Main.position.y += 0.01;
         }
         
         while(Keyboard.next()) {

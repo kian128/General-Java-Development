@@ -8,6 +8,8 @@ import main.ScreenDisplay;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class GuiMainMenu {
 	
 	public GuiMainMenu() {
@@ -28,5 +30,4 @@ public class GuiMainMenu {
 			System.exit(0);
 		}
 	}
-
 }

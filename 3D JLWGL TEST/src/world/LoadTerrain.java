@@ -1,63 +1,51 @@
 package world;
 
 import java.awt.image.BufferedImage;
+import static org.lwjgl.opengl.GL11.*;
+import javax.imageio.ImageIO;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.Image;
 
+import render.FontLoader;
+
 public class LoadTerrain {
 	
-	/**TODO: COMPLETE FILE **/
-	
-	private int w, l; //width, length
-	private float[][] heightmap;
-	private Vector3f[][] normals;
-	private boolean hasComputedNormals;
-	
-	public LoadTerrain(int w, int l) {
-		this.w = w;
-		this.l = l;
-		
-		heightmap = new float[this.l][];
-		for(int i = 0; i < l; i++) {
-			heightmap[i] = new float[w];
+	public BufferedImage getBufferedImage() {
+		InputStream ios = null;
+		FontLoader fontLoader = null;
+		BufferedImage buffer = null;
+		try {
+			ios = this.getClass().getResourceAsStream("heightmap.png");
+			buffer = ImageIO.read(ios);
+		}catch(IOException e) {
+			System.err.println(e);
 		}
-		
-		normals = new Vector3f[this.l][];
-		for(int i = 0; i < l; i++) {
-			normals[i] = new Vector3f[w];
+		return buffer;
+	}
+	
+	public int getColor(int x, int y, String color) {
+		int rgb = getBufferedImage().getRGB(x, y);
+		int red = (rgb & 0x00ff0000) >> 16;
+		int green = (rgb & 0x0000ff00) >> 8;
+		int blue = (rgb & 0x000000ff);
+		if(color == "red") return red;
+		if(color == "green") return green;
+		if(color == "blue") return blue;
+		return 0;
+	}
+	
+	public void loadTerrain() {
+		for(int x = 0; x < getBufferedImage().getWidth(); x++) {
+			glBegin(GL_TRIANGLE_STRIP);
+			for(int z = 0; z < getBufferedImage().getHeight(); z++) {
+	            glVertex3f(x, getColor(x, z, "red"), z);
+	            glVertex3f(x, getColor(x, z, "red"), z + 1);
+			}	
+			glEnd();
 		}
-		
-		hasComputedNormals = false;
-	}
-	
-	public int width() {
-		return w;
-	}
-	
-	public int length() {
-		return l;
-	}
-	
-	public void setHeight(int x, int z, float y) {
-		heightmap[z][x] = y;
-		hasComputedNormals = false;
-	}
-	
-	public float getHeight(int x, int z) {
-		return heightmap[z][x];
-	}
-	
-	public void computeNormals() {
-		if(hasComputedNormals) {
-			return;
-		}
-	}
-	
-	public Vector3f getNormal(int x, int z) {
-		if(!hasComputedNormals) {
-			computeNormals();
-		}
-		return normals[z][x];
 	}
 }

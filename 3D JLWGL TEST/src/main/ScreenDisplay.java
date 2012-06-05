@@ -46,15 +46,5 @@ public class ScreenDisplay {
 		Mouse.setCursorPosition(screenWidth / 2, screenHeight / 2);
 		
 		new RenderShaders();
-		
-		//Initialises OpenGL
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		
-		//Creates a new perspective with 30 degree angle (FOV), 640/480 aspect ratio,
-		//0.001f zNear (max), 1000 zFar (max)
-		gluPerspective((float) Main.fov, (float) screenWidth / (float) screenHeight, 0.001f, 20);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
 	}
 }

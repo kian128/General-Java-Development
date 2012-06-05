@@ -39,17 +39,24 @@ import render.TextureLoader;
 import world.LoadRoomSandbox;
 import world.LoadRoomMain;
 import world.LoadRoomSandbox;
+import world.LoadTerrain;
+import world.LoadWall;
+import world.LoadWorldOutside;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 public class Main {
 	
+	/** A lot of credit goes to Oskar of TheCodingUniverse (www.thecodinguniverse.com), without his amazing work in opengl I
+	 * never have gotten as far as I have. 
+	 */
+	
 	public static String version = "0.0.5 pre-alpha";
 	
 	public static volatile boolean running = true;
 	
-	public static Vector3f position = new Vector3f(-1, -0.5f, -1);
+	public static Vector3f position = new Vector3f(0, -0.5f, 0);
 	public static Vector3f rotation = new Vector3f(0, -180, 0);
 	public static Vector3f lightPosition = new Vector3f(0, 4, 0);	
 	
@@ -73,9 +80,18 @@ public class Main {
 	public static Render3D render = new Render3D();
 	public static TextureLoader textureLoader = new TextureLoader();
 	public static RenderLighting lighting = new RenderLighting();
+	public static LoadTerrain terrain = new LoadTerrain();
 	
  	public Main() {
 		ScreenDisplay.initialise();
+		
+		//Initialises OpenGL
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+				
+		gluPerspective((float) Main.fov, (float) ScreenDisplay.screenWidth / (float) ScreenDisplay.screenHeight, 0.001f, 200);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 		
 		new FontLoader();
 		
@@ -92,7 +108,6 @@ public class Main {
 		glCullFace(GL_BACK); //greatly improving performance
 		
 		lighting.setLightPosition(5, 0, 5);
-		new RenderFog(Color.black, 1, 20);
 		
 		getDelta();
 		lastFPS = getTime();
@@ -113,13 +128,9 @@ public class Main {
 	    	switch(GameStates.state) {
 	    		case GAME_DUNGEON_CRAWLER:
 	    			glDisable(GL_CULL_FACE);
-	    			glBindTexture(GL_TEXTURE_2D, textureLoader.loadTexture("images/stone.png"));	
-	    			glCallList(LoadRoomMain.floorDisplayList);
-	    			glCallList(LoadRoomMain.ceilingDisplayList);
-	    			LoadRoomMain.loadWalls();
+	    			new LoadRoomMain();
 	    			glLoadIdentity();
-
-	    			lighting.disableLighting();
+	    			
 	    			break;
 	    		case GAME_MODEL_TEST:
 	    			lighting.enableLighting();
@@ -139,8 +150,12 @@ public class Main {
 		        	if(position.x >= 9.8) position.x = 9.8f;
 		        	if(position.z <= -9.8) position.z = -9.8f;
 		        	if(position.z >= 9.8) position.z = 9.8f;
+		        	
 			    	break;
 	    		case GAME_TERRAIN_TEST:
+	    			glDisable(GL_CULL_FACE);
+	    			new LoadWorldOutside();
+	    			glLoadIdentity();
 	    			
 	    			break;
 	    	}
@@ -169,8 +184,6 @@ public class Main {
 					break;
 			}
 			switch(GameStates.state) {
-				case LOADING:
-					break;
 				case MENU_MAIN:
 					new GuiMainMenu();
 					break;

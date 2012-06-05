@@ -1,11 +1,20 @@
 package gui;
 
+import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
+import static org.lwjgl.opengl.GL11.glLoadIdentity;
+import static org.lwjgl.opengl.GL11.glMatrixMode;
+import static org.lwjgl.util.glu.GLU.gluPerspective;
 import main.GameStates;
 import main.GuiStates;
+import main.Main;
 import main.ScreenDisplay;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
+import org.newdawn.slick.Color;
+
+import render.RenderFog;
 
 public class GuiWorldSelect {
 	
@@ -19,6 +28,7 @@ public class GuiWorldSelect {
 		if(id == 0) {
 			GuiStates.state = GuiStates.state.HUD;
 			GameStates.state = GameStates.state.GAME_DUNGEON_CRAWLER;
+			new RenderFog(Color.black, 1, 20);
 			Mouse.setGrabbed(true);
 		}
 		if(id == 1) {
@@ -29,6 +39,7 @@ public class GuiWorldSelect {
 		if(id == 2) {
 			GameStates.state = GameStates.state.GAME_TERRAIN_TEST;
 			GuiStates.state = GuiStates.state.HUD;
+			new RenderFog(Color.cyan, 100, 200);
 			Mouse.setGrabbed(true);
 		}
 	}
